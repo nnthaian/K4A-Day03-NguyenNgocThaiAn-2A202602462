@@ -1,0 +1,65 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của trường không?",
+    "expected_behavior": "Chatbot trả lời trực tiếp từ System Prompt/kiến thức nền, không gọi bất kỳ Tool nào.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Cho mình xem CGPA và Major GPA của sinh viên SV2026001.",
+    "expected_behavior": "Agent nhận diện đúng ý định (tra cứu GPA), phát sinh Tool Call 'query_gpa' với mã SV2026001, trả về đúng CGPA và Major GPA.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "single_tool_query",
+    "question": "Sinh viên SV2026001 có đủ điều kiện tốt nghiệp không?",
+    "expected_behavior": "Agent phát sinh Tool Call 'check_graduation_eligibility', nhận kết quả không đủ điều kiện, liệt kê đầy đủ và chính xác các lý do cụ thể (không bịa thêm lý do ngoài dữ liệu trả về).",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC04",
+    "type": "single_tool_query",
+    "question": "Lịch thi cuối kỳ của sinh viên SV2026001 vào ngày nào?",
+    "expected_behavior": "Agent phát sinh Tool Call 'query_exam_schedule' với mã SV2026001, trả về đúng thông tin lịch thi.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC05",
+    "type": "appointment_booking",
+    "question": "Hãy đặt lịch hẹn tư vấn học vụ cho sinh viên SV2026001 với cố vấn PGS.TS Nguyễn Văn A vào lúc 14:00 ngày 15/09/2026.",
+    "expected_behavior": "Agent phát sinh Tool Call 'schedule_appointment' trực tiếp (không qua bước tra cứu nào), với đúng thời gian, cố vấn và mã sinh viên đã cho.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC06",
+    "type": "multi_step_reasoning",
+    "question": "Tôi là sinh viên SV2026002. Hãy kiểm tra điều kiện tốt nghiệp của tôi, nếu chưa đủ thì đặt giúp tôi lịch tư vấn với cố vấn phụ trách vào lúc 09:30 ngày 16/09/2026.",
+    "expected_behavior": "Agent thực hiện chuỗi ReAct: (1) gọi 'check_graduation_eligibility' → phát hiện chưa đủ điều kiện, (2) tự suy luận cần lấy tên cố vấn phụ trách (gọi 'query_gpa' hoặc tool tra thông tin sinh viên để lấy trường advisor), (3) gọi 'schedule_appointment' với đúng cố vấn và thời gian đã cho. Thể hiện agent tự bắc cầu từ Nhóm 1 sang Nhóm 2 dựa trên kết quả quan sát được.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC07",
+    "type": "proactive_suggestion",
+    "question": "Sinh viên SV2026002 có tốt nghiệp được không?",
+    "expected_behavior": "Sau khi trả lời kết quả 'chưa đủ điều kiện' kèm lý do cụ thể, agent CHỦ ĐỘNG đề xuất đặt lịch tư vấn với cố vấn phụ trách (không đợi sinh viên yêu cầu), thể hiện quyết định động dựa trên kết quả tra cứu.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC08",
+    "type": "edge_case_handling",
+    "question": "Hãy tra cứu thông tin học vụ của sinh viên SV9999999.",
+    "expected_behavior": "Agent nhận kết quả NOT_FOUND từ Tool, phản hồi lịch sự và chính xác, không bịa đặt dữ liệu (không tự tạo GPA hay tình trạng tốt nghiệp giả).",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC09",
+    "type": "edge_case_handling",
+    "question": "Đặt lịch tư vấn cho sinh viên SV2026001 với cố vấn TS. Lê Thị B vào lúc 14:00 ngày 15/09/2026.",
+    "expected_behavior": "Agent phát hiện cố vấn TS. Lê Thị B không phải là cố vấn phụ trách của SV2026001 (advisor thật là PGS.TS Nguyễn Văn A theo mock data), phản hồi cảnh báo/xác nhận lại với sinh viên thay vì đặt lịch sai cố vấn.",
+    "complexity": "High"
+  }
+]

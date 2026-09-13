@@ -6,6 +6,7 @@ Hỗ trợ Native Tool Calling và chuyển đổi linh hoạt qua biến môi t
 import os
 import sys
 import json
+import re
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 
@@ -36,28 +37,98 @@ class MockOfflineProvider(BaseLLMProvider):
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
-        
-        # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
-            return {
-                "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
-            }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
-            return {
-                "type": "tool_call",
-                "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
-            }
-        else:
-            return {
-                "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
-            }
+        original_prompt = prompt.split("Lịch sử ReAct:", 1)[0]
+        original_lower = original_prompt.lower()
+        student_ids = re.findall(r"sv\d+", original_lower)
+        student_id = student_ids[0].upper() if student_ids else ""
+        called_tools = re.findall(r"Tool:\s*([a-z_]+)", prompt, re.IGNORECASE)
+
+        def tool_call(tool_name: str, arguments: Dict[str, Any], thought: str) -> Dict[str, Any]:
+            return {"type": "tool_call", "tool_name": tool_name, "arguments": arguments, "thought": thought}
+
+        def final_answer(content: str, thought: str) -> Dict[str, Any]:
+            return {"type": "text", "content": content, "thought": thought}
+
+        # Lấy observation mới nhất để mô phỏng bước suy luận tiếp theo.
+        observations = re.findall(r"Observation:\s*(\{.*?\})\s*\n\nDựa", prompt, re.DOTALL)
+        observation = None
+        if observations:
+            try:
+                observation = json.loads(observations[-1])
+            except json.JSONDecodeError:
+                pass
+
+        if observation:
+            status = observation.get("status")
+            if status in {"NOT_FOUND", "ADVISOR_MISMATCH"}:
+                return final_answer(
+                    observation.get("message", "Không thể hoàn tất yêu cầu."),
+                    f"Tool trả về {status}."
+                )
+
+            # TC06: sau khi có kết quả tra cứu, dùng advisor để đặt lịch.
+            if "đặt giúp" in original_lower and "academic_query" not in called_tools:
+                return tool_call("academic_query", {"student_id": student_id}, "Tôi sẽ tra cứu cố vấn phụ trách.")
+            if "đặt giúp" in original_lower and "academic_query" in called_tools and "schedule_appointment" not in called_tools:
+                advisor = observation.get("data", {}).get("advisor", "")
+                time_match = re.search(r"\d{1,2}:\d{2}(?:\s+ngày)?\s+\d{2}/\d{2}/\d{4}", original_prompt)
+                return tool_call(
+                    "schedule_appointment",
+                    {
+                        "student_id": student_id,
+                        "datetime_str": time_match.group(0) if time_match else "",
+                        "advisor_name": advisor
+                    },
+                    "Đã có thông tin cố vấn, tôi sẽ đặt lịch tư vấn."
+                )
+
+            if "eligible" in observation:
+                reasons = "; ".join(observation.get("reasons", [])) or "Không có lý do chưa đạt."
+                return final_answer(
+                    f"Đủ điều kiện tốt nghiệp: {observation['eligible']}. Lý do: {reasons}",
+                    "Đã tổng hợp kết quả điều kiện tốt nghiệp."
+                )
+            data = observation.get("data")
+            if isinstance(data, dict) and {"cgpa", "major_gpa"} <= set(data):
+                return final_answer(
+                    f"CGPA: {data['cgpa']}; Major GPA: {data['major_gpa']}.",
+                    "Đã tổng hợp kết quả GPA."
+                )
+            if isinstance(data, list):
+                return final_answer(
+                    f"Lịch thi: {json.dumps(data, ensure_ascii=False)}",
+                    "Đã tổng hợp lịch thi."
+                )
+            if status == "SUCCESS" and "message" in observation:
+                return final_answer(observation["message"], "Đã tổng hợp kết quả đặt lịch.")
+
+        # Chọn tool hard-code theo intent của test case.
+        if "kiểm tra điều kiện tốt nghiệp" in original_lower and "đặt giúp" in original_lower:
+            return tool_call("check_graduation_eligibility", {"student_id": student_id}, "Tôi sẽ kiểm tra điều kiện tốt nghiệp trước.")
+        if ("cgpa" in original_lower or "major gpa" in original_lower) and "query_gpa" not in called_tools:
+            return tool_call("query_gpa", {"student_id": student_id}, "Tôi sẽ tra cứu GPA.")
+        if "lịch thi" in original_lower and "query_exam_schedule" not in called_tools:
+            return tool_call("query_exam_schedule", {"student_id": student_id}, "Tôi sẽ tra cứu lịch thi.")
+        if "đặt lịch" in original_lower and "schedule_appointment" not in called_tools:
+            advisor = "TS. Lê Thị B" if "ts. lê thị b" in original_lower else "PGS.TS Nguyễn Văn A"
+            time_match = re.search(r"\d{1,2}:\d{2}(?:\s+ngày)?\s+\d{2}/\d{2}/\d{4}", original_prompt)
+            return tool_call(
+                "schedule_appointment",
+                {
+                    "student_id": student_id,
+                    "datetime_str": time_match.group(0) if time_match else "",
+                    "advisor_name": advisor
+                },
+                "Tôi sẽ đặt lịch tư vấn."
+            )
+        if "đủ điều kiện tốt nghiệp" in original_lower or "có tốt nghiệp được" in original_lower:
+            return tool_call("check_graduation_eligibility", {"student_id": student_id}, "Tôi sẽ kiểm tra điều kiện tốt nghiệp.")
+        if "sv" in original_lower or "tra cứu" in original_lower:
+            return tool_call("academic_query", {"student_id": student_id}, "Tôi sẽ tra cứu thông tin học vụ.")
+        return final_answer(
+            "Quy chế học vụ cơ bản yêu cầu sinh viên duy trì GPA tối thiểu để tốt nghiệp.",
+            "Câu hỏi kiến thức chung, không cần gọi Tool."
+        )
 
 
 class GeminiProvider(BaseLLMProvider):
@@ -211,6 +282,80 @@ class OpenAIProvider(BaseLLMProvider):
             return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
 
 
+class NvidiaProvider(OpenAIProvider):
+    """NVIDIA NIM provider dùng API tương thích OpenAI."""
+    def __init__(self, api_key: str = None, model: str = None):
+        self.api_key = api_key or os.getenv("NVIDIA_API_KEY")
+        self.base_url = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
+        self.model_name = model or os.getenv("LLM_MODEL") or "meta/llama-3.1-8b-instruct"
+
+    def _client(self):
+        from openai import OpenAI
+        return OpenAI(api_key=self.api_key, base_url=self.base_url)
+
+    def generate(self, prompt: str, system_prompt: str = "") -> str:
+        try:
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+            response = self._client().chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+                temperature=0.2
+            )
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            return f"[NVIDIA NIM Exception]: {str(e)}"
+
+    def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
+        if not self.api_key or self.api_key == "nvapi-your_api_key_here":
+            print("ℹ️ [NVIDIA NIM]: Chưa tìm thấy NVIDIA_API_KEY hợp lệ. Tự động chuyển sang Mock Offline.")
+            return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
+
+        try:
+            tools = [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": tool["name"],
+                        "description": tool.get("description", ""),
+                        "parameters": tool.get("parameters", {})
+                    }
+                }
+                for tool in tools_schema
+                if tool.get("name")
+            ]
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+            response = self._client().chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+                tools=tools or None,
+                tool_choice="auto" if tools else None,
+                temperature=0.2
+            )
+            message = response.choices[0].message
+            if message.tool_calls:
+                call = message.tool_calls[0]
+                return {
+                    "type": "tool_call",
+                    "tool_name": call.function.name,
+                    "arguments": json.loads(call.function.arguments or "{}"),
+                    "thought": f"NVIDIA NIM quyết định gọi công cụ '{call.function.name}'."
+                }
+            return {
+                "type": "text",
+                "content": message.content or "",
+                "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản."
+            }
+        except Exception as e:
+            print(f"⚠️ [NVIDIA NIM Warning]: {e}. Tự động fallback về Mock.")
+            return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
+
+
 def get_llm_provider() -> BaseLLMProvider:
     """Factory function khởi tạo Provider theo LLM_PROVIDER env variable"""
     provider_type = os.getenv("LLM_PROVIDER", "gemini").lower()
@@ -225,6 +370,12 @@ def get_llm_provider() -> BaseLLMProvider:
         key = os.getenv("OPENAI_API_KEY")
         if key and key != "your_openai_api_key_here":
             return OpenAIProvider()
+        else:
+            return MockOfflineProvider()
+    elif provider_type == "nvidia":
+        key = os.getenv("NVIDIA_API_KEY")
+        if key and key != "nvapi-your_api_key_here":
+            return NvidiaProvider()
         else:
             return MockOfflineProvider()
     elif provider_type == "mock":

@@ -71,6 +71,7 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
     step = 0
     trace_logs = []
     tools_list = mcp_server.list_tools()
+    conversation = user_query
     
     while step < MAX_ITERATIONS:
         step += 1
@@ -78,7 +79,7 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
         print(f"\n--- 🔄 Vòng lặp ReAct Loop (Step {step}/{MAX_ITERATIONS}) ---")
         
         # Gọi LLM với Native Tool Calling Specs
-        llm_response = provider.generate_with_tools(user_query, tools_list, system_prompt=REACT_AGENT_SYSTEM_PROMPT)
+        llm_response = provider.generate_with_tools(conversation, tools_list, system_prompt=REACT_AGENT_SYSTEM_PROMPT)
         latency_ms = round((time.time() - step_start_time) * 1000, 2)
         
         thought = llm_response.get("thought", "Đang suy luận...")
@@ -109,31 +110,8 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
             mcp_result = mcp_server.call_tool(tool_name, arguments)
             obs_data = mcp_result.get("result", {})
             
-            if not obs_data:
-                print(f"👁️ [Observation từ MCP Server]: {{}}")
-                print(f"⚠️ [CHÚ Ý]: MCP Server trả về kết quả rỗng! Học viên cần hoàn thành TODO 2.1 trong 'src/mcp_server.py'.")
-                final_answer = "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1)."
-            else:
-                obs_str = json.dumps(obs_data, ensure_ascii=False)
-                print(f"👁️ [Observation từ MCP Server]: {obs_str}")
-                
-                # Tổng hợp Final Answer từ kết quả Observation thực tế
-                if obs_data.get("status") == "SUCCESS":
-                    if "data" in obs_data:
-                        d = obs_data["data"]
-                        final_answer = (
-                            f"Kết quả tra cứu cho sinh viên {obs_data.get('student_id', '')} ({d.get('full_name', '')}): "
-                            f"Lớp {d.get('class', '')}, GPA: {d.get('gpa', '')}, Email: {d.get('email', '')}, "
-                            f"Trạng thái: {d.get('status', '')}, Cố vấn: {d.get('advisor', '')}."
-                        )
-                    elif "message" in obs_data:
-                        final_answer = obs_data["message"]
-                    else:
-                        final_answer = f"Đã hoàn tất xử lý qua MCP Server: {json.dumps(obs_data, ensure_ascii=False)}"
-                elif obs_data.get("status") == "NOT_FOUND":
-                    final_answer = obs_data.get("message", "Không tìm thấy thông tin sinh viên yêu cầu.")
-                else:
-                    final_answer = f"Phản hồi từ công cụ: {json.dumps(obs_data, ensure_ascii=False)}"
+            obs_str = json.dumps(obs_data, ensure_ascii=False)
+            print(f"👁️ [Observation từ MCP Server]: {obs_str}")
             
             trace_logs.append({
                 "step": step,
@@ -145,19 +123,39 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 "latency_ms": latency_ms
             })
             
-            # Kết thúc vòng lặp sau khi hoàn tất Observation và xuất Final Answer
-            print(f"🧠 [Thought]: Đã nhận được dữ liệu từ MCP Server. Tổng hợp kết quả phản hồi.")
-            print(f"🏁 [Final Answer]: {final_answer}")
-            
+            conversation = (
+                f"{conversation}\n\n"
+                f"Lịch sử ReAct:\n"
+                f"Tool: {tool_name}\n"
+                f"Action: {json.dumps(arguments, ensure_ascii=False)}\n"
+                f"Observation: {obs_str}\n\n"
+                "Dựa trên observation này, hãy tiếp tục gọi tool cần thiết hoặc trả lời cuối cùng."
+            )
+
+        else:
+            final_answer = "Agent trả về phản hồi không hợp lệ, không có type text hoặc tool_call."
+            print(f"⚠️ [Agent Error]: {final_answer}")
             trace_logs.append({
-                "step": step + 1,
+                "step": step,
                 "query": user_query,
-                "action_type": "FINAL_ANSWER",
-                "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+                "action_type": "ERROR",
+                "thought": thought,
                 "output": final_answer,
-                "latency_ms": 10.0
+                "latency_ms": latency_ms
             })
             break
+
+    else:
+        final_answer = "Agent đã đạt giới hạn số bước suy luận mà chưa tạo được câu trả lời cuối cùng."
+        print(f"⚠️ [MAX ITERATIONS]: {final_answer}")
+        trace_logs.append({
+            "step": MAX_ITERATIONS,
+            "query": user_query,
+            "action_type": "ERROR",
+            "thought": "Đã đạt giới hạn vòng lặp ReAct.",
+            "output": final_answer,
+            "latency_ms": 0.0
+        })
 
     return trace_logs
 
@@ -171,7 +169,7 @@ if __name__ == "__main__":
     mcp_server = MCPAcademicServer()
     
     print(f"🔌 LLM Provider: {provider.__class__.__name__}")
-    print(f"🌐 MCP Server: {mcp_server.server_name}\n")
+    print(f"🌐 MCP Server: {mcp_server.server_name}")
     
     tests = load_test_cases()
     print(f"✅ Đã tải thành công {len(tests)} Test Cases thử nghiệm.\n")
@@ -195,7 +193,7 @@ if __name__ == "__main__":
                 print("\n👋 Đã thoát phiên tương tác.")
                 break
     elif "--all" in sys.argv:
-        print("🚀 [TEST SUITE MODE] Kiểm tra 5 Test Cases:")
+        print("🚀 [TEST SUITE MODE] Kiểm tra 9 Test Cases:")
         completed_count = 0
         todo_count = 0
         all_traces = []

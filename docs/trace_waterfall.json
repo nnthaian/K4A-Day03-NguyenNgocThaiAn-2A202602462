@@ -1,29 +1,290 @@
 [
   {
     "step": 1,
-    "query": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của Đại học VinUni không?",
+    "query": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của trường không?",
     "action_type": "FINAL_ANSWER",
-    "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool.",
-    "output": "[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-    "latency_ms": 2845.93
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Chào bạn! Tôi có thể cung cấp cho bạn một tổng quan về quy chế học vụ cơ bản tại VinUniversity. Dưới đây là những điểm chính:\n\n## **1. Hệ thống tín chỉ và chương trình đào tạo**\n- **Hệ tín chỉ**: VinUni áp dụng hệ thống tín chỉ (credit system) tương thích với chuẩn quốc tế\n- **Chương trình**: Bao gồm Giáo dục chung (General Education), Chuyên ngành (Major), và Tự chọn (Electives)\n- **Tổng tín chỉ tốt nghiệp**: Thường từ 120-130 tín chỉ tùy chuyên ngành\n\n## **2. Đăng ký học phần**\n- **Kỳ đăng ký**: Trước mỗi học kỳ (thường có 2 kỳ chính: Fall, Spring và kỳ hè Summer)\n- **Tín chỉ tối thiểu/tối đa**: 12-18 tín chỉ/kỳ (sinh viên chính quy), có thể xin phép quá tải\n- **Thêm/xóa học phần**: Có thời hạn Add/Drop (thường 2 tuần đầu học kỳ)\n\n## **3. Đánh giá và thang điểm**\n- **Thang điểm chữ**: A+, A, A-, B+, B, B-, C+, C, C-, D+, D, F\n- **Điểm số**: 4.0 (A+) đến 0.0 (F)\n- **CGPA**: Điểm trung bình tích lũy toàn khóa\n- **Major GPA**: Điểm trung bình các môn chuyên ngành\n\n## **4. Điều kiện học tập và cảnh cáo**\n- **Good Standing**: CGPA ≥ 2.0\n- **Academic Probation**: CGPA < 2.0 (bị cảnh cáo học vụ)\n- **Academic Suspension**: Không đạt yêu cầu sau kỳ Probation\n- **Dismissal**: Buộc thôi học nếu không cải thiện\n\n## **5. Điều kiện tốt nghiệp**\n- Hoàn thành đủ tín chỉ chương trình\n- CGPA ≥ 2.0 và Major GPA ≥ 2.0\n- Không có môn bắt buộc nào bị trượt (F)\n- Hoàn thành thực tập/khóa luận (nếu yêu cầu)\n- Đáp ứng yêu cầu tiếng Anh và kỹ năng mềm\n\n## **6. Học phần lại và cải thiện điểm**\n- **Retake**: Học lại môn F hoặc muốn cải thiện điểm (tối đa 2 lần/môn)\n- **Grade Replacement**: Điểm mới thay thế điểm cũ trong CGPA (theo quy định)\n\n## **7. Nghỉ học và bảo lưu**\n- **Leave of Absence**: Xin nghỉ học tạm thời (tối đa 2 năm liên tục)\n- **Withdrawal**: Rút học phần sau thời hạn Add/Drop (ghi W trên bảng điểm)\n\n## **8. Hành vi học thuật**\n- Tuân thủ chính sách Academic Integrity\n- Cấm gian lặp, đạo văn, làm giả dữ liệu\n- Xử phạt: từ cảnh cáo đến đuổi học tùy mức độ\n\n---\n\n**Lưu ý**: Đây là thông tin tổng quan. Quy chế chi tiết và cập nhật nhất bạn nên tham khảo tại:\n- **Student Handbook** (Sổ tay sinh viên)\n- **Academic Catalog** (Danh mục đào tạo)\n- Website **Office of the Registrar** (Văn phòng Học vụ)\n- Hoặc liên hệ trực tiếp **Cố vấn học tập (Academic Advisor)** của bạn\n\nBạn có câu hỏi cụ thể về quy định nào không? Hoặc nếu bạn là sinh viên VinUni, tôi có thể tra cứu thông tin cá nhân của bạn (như GPA, lịch thi, điều kiện tốt nghiệp...) nếu cung cấp mã sinh viên.",
+    "latency_ms": 35917.14
   },
   {
     "step": 1,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "Cho mình xem CGPA và Major GPA của sinh viên SV2026001.",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "query_gpa",
     "arguments": {
       "student_id": "SV2026001"
     },
-    "observation": {},
-    "latency_ms": 799.12
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026001",
+      "data": {
+        "cgpa": 3.85,
+        "major_gpa": 3.9
+      }
+    },
+    "latency_ms": 7586.23
   },
   {
     "step": 2,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "Cho mình xem CGPA và Major GPA của sinh viên SV2026001.",
     "action_type": "FINAL_ANSWER",
-    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-    "output": "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1).",
-    "latency_ms": 10.0
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Dựa trên kết quả tra cứu, thông tin GPA của sinh viên **SV2026001** như sau:\n\n- **CGPA (Điểm trung bình tích lũy):** 3.85\n- **Major GPA (Điểm trung bình chuyên ngành):** 3.90\n\nĐây là kết quả chính xác từ hệ thống học vụ VinUni.",
+    "latency_ms": 5153.82
+  },
+  {
+    "step": 1,
+    "query": "Sinh viên SV2026001 có đủ điều kiện tốt nghiệp không?",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "check_graduation_eligibility",
+    "arguments": {
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026001",
+      "eligible": true,
+      "reasons": []
+    },
+    "latency_ms": 20308.94
+  },
+  {
+    "step": 2,
+    "query": "Sinh viên SV2026001 có đủ điều kiện tốt nghiệp không?",
+    "action_type": "FINAL_ANSWER",
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Dựa trên kết quả kiểm tra điều kiện tốt nghiệp, sinh viên **SV2026001** **ĐÃ ĐẠT ĐỦ ĐIỀU KIỆN TỐT NGHIỆP**.\n\n- **Trạng thái:** Đủ điều kiện (eligible: true)\n- **Các lý do chưa đạt:** Không có (danh sách rỗng)\n\nChúc mừng sinh viên SV2026001!",
+    "latency_ms": 2952.2
+  },
+  {
+    "step": 1,
+    "query": "Lịch thi cuối kỳ của sinh viên SV2026001 vào ngày nào?",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "query_exam_schedule",
+    "arguments": {
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026001",
+      "data": [
+        {
+          "course_code": "AI302",
+          "course_name": "Học máy",
+          "exam_date": "22/09/2026",
+          "start_time": "13:30",
+          "room": "B105"
+        }
+      ]
+    },
+    "latency_ms": 8780.83
+  },
+  {
+    "step": 2,
+    "query": "Lịch thi cuối kỳ của sinh viên SV2026001 vào ngày nào?",
+    "action_type": "FINAL_ANSWER",
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Lịch thi cuối kỳ của sinh viên **SV2026001** như sau:\n\n- **Môn học:** AI302 - Học máy\n- **Ngày thi:** 22/09/2026\n- **Giờ bắt đầu:** 13:30\n- **Phòng thi:** B105\n\nChúc bạn ôn thi tốt và đạt kết quả cao!",
+    "latency_ms": 8284.98
+  },
+  {
+    "step": 1,
+    "query": "Hãy đặt lịch hẹn tư vấn học vụ cho sinh viên SV2026001 với cố vấn PGS.TS Nguyễn Văn A vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "advisor_name": "PGS.TS Nguyễn Văn A",
+      "datetime_str": "15/09/2026 14:00",
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026001-99",
+      "student_id": "SV2026001",
+      "datetime": "15/09/2026 14:00",
+      "advisor": "PGS.TS Nguyễn Văn A",
+      "message": "Đặt lịch thành công cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 15/09/2026 14:00."
+    },
+    "latency_ms": 14435.25
+  },
+  {
+    "step": 2,
+    "query": "Hãy đặt lịch hẹn tư vấn học vụ cho sinh viên SV2026001 với cố vấn PGS.TS Nguyễn Văn A vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Đã đặt lịch hẹn tư vấn học vụ thành công cho bạn!\n\n**Thông tin chi tiết lịch hẹn:**\n- **Mã đặt lịch:** BK-SV2026001-99\n- **Sinh viên:** SV2026001\n- **Cố vấn:** PGS.TS Nguyễn Văn A\n- **Thời gian:** 15/09/2026 lúc 14:00\n\nBạn vui lòng đến đúng giờ để được cố vấn hỗ trợ nhé!",
+    "latency_ms": 32915.29
+  },
+  {
+    "step": 1,
+    "query": "Tôi là sinh viên SV2026002. Hãy kiểm tra điều kiện tốt nghiệp của tôi, nếu chưa đủ thì đặt giúp tôi lịch tư vấn với cố vấn phụ trách vào lúc 09:30 ngày 16/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "check_graduation_eligibility",
+    "arguments": {
+      "student_id": "SV2026002"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026002",
+      "eligible": false,
+      "reasons": [
+        "Còn thiếu tín chỉ tổng: 118/140",
+        "Còn thiếu tín chỉ chuyên ngành: 45/60",
+        "Còn học phần chưa đạt: CS301 - Thuật toán",
+        "Chưa hoàn thành thực tập",
+        "Tình trạng khóa luận: Đang thực hiện"
+      ]
+    },
+    "latency_ms": 7899.34
+  },
+  {
+    "step": 2,
+    "query": "Tôi là sinh viên SV2026002. Hãy kiểm tra điều kiện tốt nghiệp của tôi, nếu chưa đủ thì đặt giúp tôi lịch tư vấn với cố vấn phụ trách vào lúc 09:30 ngày 16/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "academic_query",
+    "arguments": {
+      "student_id": "SV2026002"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026002",
+      "data": {
+        "full_name": "Trần Thị Bình",
+        "class": "AI-K4",
+        "email": "binh.tt@vinuni.edu.vn",
+        "status": "Đang học",
+        "advisor": "TS. Lê Thị B",
+        "exam_schedule": [
+          {
+            "course_code": "DB204",
+            "course_name": "Cơ sở dữ liệu",
+            "exam_date": "24/09/2026",
+            "start_time": "08:00",
+            "room": "A203"
+          }
+        ],
+        "cgpa": 3.6,
+        "major_gpa": 3.55,
+        "total_credits_required": 140,
+        "credits_earned": 118,
+        "major_credits_required": 60,
+        "major_credits_earned": 45,
+        "failed_courses": [
+          "CS301 - Thuật toán"
+        ],
+        "internship_completed": false,
+        "thesis_status": "Đang thực hiện",
+        "min_gpa_to_graduate": 2.0
+      }
+    },
+    "latency_ms": 11982.63
+  },
+  {
+    "step": 3,
+    "query": "Tôi là sinh viên SV2026002. Hãy kiểm tra điều kiện tốt nghiệp của tôi, nếu chưa đủ thì đặt giúp tôi lịch tư vấn với cố vấn phụ trách vào lúc 09:30 ngày 16/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "advisor_name": "TS. Lê Thị B",
+      "student_id": "SV2026002",
+      "datetime_str": "16/09/2026 09:30"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026002-99",
+      "student_id": "SV2026002",
+      "datetime": "16/09/2026 09:30",
+      "advisor": "TS. Lê Thị B",
+      "message": "Đặt lịch thành công cho sinh viên SV2026002 với TS. Lê Thị B vào lúc 16/09/2026 09:30."
+    },
+    "latency_ms": 12237.83
+  },
+  {
+    "step": 4,
+    "query": "Tôi là sinh viên SV2026002. Hãy kiểm tra điều kiện tốt nghiệp của tôi, nếu chưa đủ thì đặt giúp tôi lịch tư vấn với cố vấn phụ trách vào lúc 09:30 ngày 16/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Chào bạn Trần Thị Bình (SV2026002),\n\nTôi đã kiểm tra điều kiện tốt nghiệp của bạn và kết quả cho thấy **bạn chưa đủ điều kiện tốt nghiệp** với các lý do sau:\n\n1. **Thiếu tín chỉ tổng**: 118/140 tín chỉ (còn thiếu 22 tín chỉ)\n2. **Thiếu tín chỉ chuyên ngành**: 45/60 tín chỉ (còn thiếu 15 tín chỉ)\n3. **Học phần chưa đạt**: CS301 - Thuật toán\n4. **Chưa hoàn thành thực tập**\n5. **Khóa luận**: Đang thực hiện\n\nTuy nhiên, GPA của bạn khá tốt (CGPA: 3.6, Major GPA: 3.55) - đều vượt quá ngưỡng tối thiểu 2.0 để tốt nghiệp.\n\nTheo yêu cầu của bạn, tôi đã **đặt lịch tư vấn thành công** với cố vấn học tập phụ trách **TS. Lê Thị B**:\n- **Mã đặt lịch**: BK-SV2026002-99\n- **Thời gian**: 09:30 ngày 16/09/2026\n- **Cố vấn**: TS. Lê Thị B\n\nBạn hãy chuẩn bị các câu hỏi về kế hoạch hoàn thiện tín chỉ, học lại CS301, thực tập và tiến độ khóa luận để thảo luận chi tiết với cố vấn trong buổi tư vấn này nhé.\n\nChúc bạn có một buổi tư vấn hiệu quả!",
+    "latency_ms": 16962.22
+  },
+  {
+    "step": 1,
+    "query": "Sinh viên SV2026002 có tốt nghiệp được không?",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "check_graduation_eligibility",
+    "arguments": {
+      "student_id": "SV2026002"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026002",
+      "eligible": false,
+      "reasons": [
+        "Còn thiếu tín chỉ tổng: 118/140",
+        "Còn thiếu tín chỉ chuyên ngành: 45/60",
+        "Còn học phần chưa đạt: CS301 - Thuật toán",
+        "Chưa hoàn thành thực tập",
+        "Tình trạng khóa luận: Đang thực hiện"
+      ]
+    },
+    "latency_ms": 29786.94
+  },
+  {
+    "step": 2,
+    "query": "Sinh viên SV2026002 có tốt nghiệp được không?",
+    "action_type": "FINAL_ANSWER",
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Dựa trên kết quả kiểm tra điều kiện tốt nghiệp, **sinh viên SV2026002 hiện tại KHÔNG đủ điều kiện tốt nghiệp**. Các lý do cụ thể:\n\n1. **Thiếu tín chỉ tổng**: Chỉ đạt 118/140 tín chỉ (còn thiếu 22 tín chỉ)\n2. **Thiếu tín chỉ chuyên ngành**: Chỉ đạt 45/60 tín chỉ (còn thiếu 15 tín chỉ)\n3. **Còn học phần chưa đạt**: CS301 - Thuật toán\n4. **Chưa hoàn thành thực tập**\n5. **Khóa luận**: Đang thực hiện (chưa hoàn thành)\n\nSinh viên cần hoàn thành các yêu cầu trên trước khi có thể xét tốt nghiệp.",
+    "latency_ms": 7774.7
+  },
+  {
+    "step": 1,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV9999999.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "academic_query",
+    "arguments": {
+      "student_id": "SV9999999"
+    },
+    "observation": {
+      "status": "NOT_FOUND",
+      "message": "Không tìm thấy dữ liệu sinh viên có mã 'SV9999999'"
+    },
+    "latency_ms": 2238.78
+  },
+  {
+    "step": 2,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV9999999.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Không tìm thấy dữ liệu sinh viên có mã **SV9999999** trong hệ thống học vụ VinUni. Vui lòng kiểm tra lại mã sinh viên và thử lại.",
+    "latency_ms": 3952.3
+  },
+  {
+    "step": 1,
+    "query": "Đặt lịch tư vấn cho sinh viên SV2026001 với cố vấn TS. Lê Thị B vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "datetime_str": "15/09/2026 14:00",
+      "advisor_name": "TS. Lê Thị B",
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "ADVISOR_MISMATCH",
+      "student_id": "SV2026001",
+      "requested_advisor": "TS. Lê Thị B",
+      "actual_advisor": "PGS.TS Nguyễn Văn A",
+      "message": "Cố vấn phụ trách của SV2026001 là PGS.TS Nguyễn Văn A, không phải TS. Lê Thị B."
+    },
+    "latency_ms": 4885.72
+  },
+  {
+    "step": 2,
+    "query": "Đặt lịch tư vấn cho sinh viên SV2026001 với cố vấn TS. Lê Thị B vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "NVIDIA NIM phản hồi trực tiếp bằng văn bản.",
+    "output": "Cảnh báo: Hệ thống phát hiện sự không khớp cố vấn học tập.\n\n**Thông tin từ hệ thống:**\n- Sinh viên: **SV2026001**\n- Cố vấn bạn yêu cầu: **TS. Lê Thị B**\n- Cố vấn thực tế phụ trách: **PGS.TS Nguyễn Văn A**\n\nTheo quy định, sinh viên chỉ được đặt lịch tư vấn với cố vấn được phân công phụ trách. Do đó, hệ thống **không thể đặt lịch** với TS. Lê Thị B cho sinh viên này.\n\n**Bạn có muốn:**\n1. Đặt lịch với cố vấn đúng là **PGS.TS Nguyễn Văn A** vào cùng thời gian (15/09/2026 14:00)?\n2. Hoặc chọn thời gian khác với PGS.TS Nguyễn Văn A?\n3. Liên hệ bộ phận học vụ để xem xét việc thay đổi cố vấn (nếu có lý do đặc biệt)?\n\nVui lòng cho tôi biết lựa chọn của bạn để tôi hỗ trợ tiếp.",
+    "latency_ms": 14685.91
   }
 ]
